@@ -24,6 +24,29 @@ Explanation
 
 本目录
 
+- [1. 导入](#1-导入)
+
+- [2-全局变量](#2-全局变量)
+
+- [3-marked-设置](#3-marked-设置)
+
+- [4-模拟浏览器环境](#4-模拟浏览器环境)
+
+- [5-依据-tags-添加侧边-便签名单](#5-依据-tags-添加侧边-便签名单)
+
+- [6-将md文件-html化](#6-将md文件-html化)
+
+- [7-组建-便签-超链接](#7-组建-便签-超链接)
+
+- [8- 加-html-文档-解析](#8-加-html-文档-解析)
+
+- [toKebabCase](toKebabCase)
+
+- [dom](dom)
+
+- [createElement](createElement)
+
+
 ---
 
 ## package.json
@@ -204,9 +227,15 @@ const components = {
 }
 ```
 
-### 5. 
+- [dom](#dom)
 
-```
+> 用 JSDOM 给出 浏览器api
+
+---
+
+### 5. 依据-tags-添加侧边-便签名单
+
+``` js
 const snippetContainer = components.main.querySelector('.container')
 const sidebarLinkContainer = components.sidebar.querySelector('.sidebar__links')
 TAGS.slice(1).forEach(tag => {
@@ -220,17 +249,19 @@ TAGS.slice(1).forEach(tag => {
 })
 ```
 
-### 6. 
+---
+
+### 6. 将md文件-html化
 
 ``` js
-for (const snippetFile of fs.readdirSync(SNIPPETS_PATH)) {
-  const snippetPath = path.join(SNIPPETS_PATH, snippetFile)
-  const snippetData = fs.readFileSync(snippetPath, 'utf8')
-  const markdown = marked(snippetData, { renderer })
-  const snippetEl = createElement(`<div class="snippet">${markdown}</div>`)
-  snippetContainer.append(snippetEl)
+for (const snippetFile of fs.readdirSync(SNIPPETS_PATH)) { // 拿到-讲解-css-md 文件
+  const snippetPath = path.join(SNIPPETS_PATH, snippetFile) // 路径
+  const snippetData = fs.readFileSync(snippetPath, 'utf8') // 数据
+  const markdown = marked(snippetData, { renderer }) // 解析 md -> html
+  const snippetEl = createElement(`<div class="snippet">${markdown}</div>`) // 放入 html 元素
+  snippetContainer.append(snippetEl) // 再 放入 html 元素
 
-  // browser support usage
+  // browser support usage 浏览器支持-情况
   const featUsageShares = (snippetData.match(/https?:\/\/caniuse\.com\/#feat=.*/g) || []).map(
     feat => {
       const featData = caniuseDb.data[feat.match(/#feat=(.*)/)[1]]
@@ -248,14 +279,14 @@ for (const snippetFile of fs.readdirSync(SNIPPETS_PATH)) {
     `)
   )
 
-  // sidebar link
+  // sidebar link 侧边-css-超链接
   const link = createElement(
     `<a class="sidebar__link" href="#${snippetFile.replace('.md', '')}">${
       snippetEl.querySelector('h3').innerHTML
     }</a>`
   )
 
-  // tags
+  // tags css-讲解-html的小标签
   const tags = (snippetData.match(/<!--\s*tags:\s*(.+?)-->/) || [, ''])[1]
     .split(/,\s*/)
     .forEach(tag => {
@@ -276,7 +307,7 @@ for (const snippetFile of fs.readdirSync(SNIPPETS_PATH)) {
 ```
 
 
-### 7. 
+### 7. 组建-便签-超链接
 
 ``` js
 // build dom
@@ -290,14 +321,14 @@ TAGS.forEach(tag =>
   )
 )
 const content = document.querySelector('.content-wrapper')
-content.before(components.backToTopButton)
+content.before(components.backToTopButton) 
 content.before(components.sidebar)
 content.append(components.header)
 content.append(components.main)
 components.main.querySelector('.container').prepend(components.tags)
 ```
 
-### 8. 
+### 8.  加-html-文档-解析
 
 ``` js
 // doctype declaration gets stripped, add it back in
@@ -308,6 +339,9 @@ ${pretty(document.documentElement.outerHTML, { ocd: true })}
 fs.writeFileSync('./index.html', html)
 ```
 
+
+
+---
 
 ## utils
 
@@ -326,6 +360,8 @@ exports.toKebabCase = str =>
     .join('-')
 ```
 
+> 变小写 同时 将 类似 字段含有空格「HELLO World」 => 变 => 「hello-world」
+
 ### dom
 
 ``` js
@@ -335,6 +371,11 @@ exports.dom = path => {
 }
 
 ```
+
+- `JSDOM` 可以提供 浏览器的api, 用户像在浏览器体验
+
+> 这里是 返回 主document
+
 ### createElement
 
 
@@ -344,5 +385,8 @@ exports.createElement = str => {
   el.innerHTML = str
   return el.firstElementChild
 }
-
 ```
+
+- `JSDOM` 可以提供 浏览器的api, 用户像在浏览器体验
+
+> 这里是返回 html element
